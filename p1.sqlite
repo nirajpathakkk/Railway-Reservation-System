@@ -1,0 +1,90 @@
+CREATE TABLE Train (
+  train_number INT PRIMARY KEY,
+  train_name VARCHAR(255) NOT NULL,
+  source VARCHAR(255) NOT NULL,
+  destination VARCHAR(255) NOT NULL,
+  premium_fare DECIMAL(10,2) NOT NULL,
+  general_fare DECIMAL(10,2) NOT NULL,
+  weekdays_available VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Booking (
+  booking_id INT PRIMARY KEY,
+  train_number INT NOT NULL,
+  booking_date DATE NOT NULL,
+  total_seats INT NOT NULL,
+  occupied_seats INT NOT NULL,
+  FOREIGN KEY (train_number) REFERENCES Train (train_number)
+);
+
+CREATE TABLE Passenger (
+  passenger_id INT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  age INT NOT NULL,
+  address VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Booking_Passenger (
+  booking_id INT NOT NULL,
+  passenger_id INT NOT NULL,
+  reservation_status VARCHAR(255) NOT NULL,
+  ticket_category VARCHAR(255) NOT NULL,
+  PRIMARY KEY (booking_id, passenger_id),
+  FOREIGN KEY (booking_id) REFERENCES Booking (booking_id),
+  FOREIGN KEY (passenger_id) REFERENCES Passenger (passenger_id)
+);
+
+CREATE TABLE Ticket (
+  ticket_id INT PRIMARY KEY,
+  booking_id INT NOT NULL,
+  ticket_category VARCHAR(255) NOT NULL,
+  FOREIGN KEY (booking_id) REFERENCES Booking (booking_id)
+);
+
+SELECT Train.TrainNumber, Train.TrainName, Train.Source, Train.Destination
+FROM Ticket
+JOIN Passenger ON Ticket.PassengerID = Passenger.PassengerID
+JOIN Train ON Ticket.TrainNumber = Train.TrainNumber
+WHERE Passenger.FirstName = 'John' AND Passenger.LastName = 'Doe';
+
+SELECT Passenger.FirstName, Passenger.LastName
+FROM Ticket
+JOIN Passenger ON Ticket.PassengerID = Passenger.PassengerID
+WHERE Ticket.ReservationDate = '2024-10-01' AND Ticket.Status = 'Confirmed';
+
+SELECT Train.TrainNumber, Train.TrainName, Train.Source, Train.Destination, 
+       Passenger.FirstName, Passenger.LastName, Passenger.Address, 
+       Ticket.Category, Ticket.Status
+FROM Ticket
+JOIN Passenger ON Ticket.PassengerID = Passenger.PassengerID
+JOIN Train ON Ticket.TrainNumber = Train.TrainNumber
+WHERE Passenger.Age BETWEEN 50 AND 60;
+
+SELECT Train.TrainName, Ticket.ReservationDate, COUNT(Ticket.TicketID) AS PassengerCount
+FROM Ticket
+JOIN Train ON Ticket.TrainNumber = Train.TrainNumber
+GROUP BY Train.TrainName, Ticket.ReservationDate;
+
+SELECT Passenger.FirstName, Passenger.LastName
+FROM Ticket
+JOIN Passenger ON Ticket.PassengerID = Passenger.PassengerID
+JOIN Train ON Ticket.TrainNumber = Train.TrainNumber
+WHERE Train.TrainName = 'Express' AND Ticket.Status = 'Confirmed';
+
+SELECT Passenger.FirstName, Passenger.LastName, Train.TrainName
+FROM Ticket
+JOIN Passenger ON Ticket.PassengerID = Passenger.PassengerID
+JOIN Train ON Ticket.TrainNumber = Train.TrainNumber
+WHERE Ticket.Status = 'Waitlist';
+
+SELECT Passenger.FirstName, Passenger.LastName
+FROM Passenger
+WHERE Passenger.PhoneNumber LIKE '605%'
+ORDER BY Passenger.LastName DESC;
+
+SELECT Passenger.FirstName, Passenger.LastName
+FROM Ticket
+JOIN Passenger ON Ticket.PassengerID = Passenger.PassengerID
+JOIN Train ON Ticket.TrainNumber = Train.TrainNumber
+WHERE Train.AvailableDays LIKE '%Thu%'
+ORDER BY Passenger.FirstName ASC;
